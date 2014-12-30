@@ -13,13 +13,27 @@ import (
 )
 
 const (
-	url          = "wss://ws.blockchain.info:443/inv"
-	pingInterval = time.Second * 30
+	PingInterval = time.Second * 30
+	Url          = "wss://ws.blockchain.info:443/inv"
+	Usage        = `
+	  Usage:
+		bithook blocks -- Subscribe to new blocks.
+		bithook unconfirmed -- Subscribe to new unconfirmed transactions.
+		bithook address <address> -- Subscribe to address.
+		bithook test -- Receives latest transaction. Use for testing.
+		bithook help -- This help menu.
+		bithook version -- This version.
+	`
+	Version = "0.0.1"
 )
 
 type connection struct {
 	ws   *websocket.Conn
 	conn *websocket.Dialer
+}
+
+type response struct {
+	Data map[string]interface{} `json:"data"`
 }
 
 // Send messages wrapper.
@@ -28,6 +42,7 @@ func (c *connection) send(messageType int, payload []byte) {
 	c.ws.WriteMessage(messageType, payload)
 
 	/*
+		// Blockchain websocket accepts message strings
 		c.ws.WriteJSON(payload)
 		fmt.Printf("Send: %s\n", payload)
 	*/
@@ -69,10 +84,6 @@ func (c *connection) debugPingBlock() {
 	c.read()
 }
 
-type response struct {
-	Data map[string]interface{} `json:"data"`
-}
-
 // Listen for new messages on websocket forloop.
 func (c *connection) read() {
 	for {
@@ -90,7 +101,7 @@ func (c *connection) read() {
 
 // Sends ping every n seconds to keep connection alive
 func (c *connection) setPinger() {
-	ticker := time.NewTicker(pingInterval)
+	ticker := time.NewTicker(PingInterval)
 
 	go func() {
 		for {
@@ -104,6 +115,7 @@ func (c *connection) setPinger() {
 	}()
 }
 
+// Sends POST request along with json data
 func webHook(data []byte) {
 	url := "http://requestb.in/140q6so1"
 
@@ -123,11 +135,12 @@ func webHook(data []byte) {
 	fmt.Println("response Body:", string(body))
 }
 
+// Creates and returns connection
 func connect() *connection {
 	fmt.Println("Starting connection...")
 
 	dialer := websocket.Dialer{}
-	conn, _, _ := dialer.Dial(url, nil)
+	conn, _, _ := dialer.Dial(Url, nil)
 
 	c := &connection{ws: conn}
 
@@ -137,6 +150,7 @@ func connect() *connection {
 	return c
 }
 
+// Parses and validates cli arguments
 func parseArgs(args []string) {
 	option := args[0]
 
@@ -167,13 +181,22 @@ func parseArgs(args []string) {
 		c := connect()
 		c.debugPing()
 
+	case "version":
+		fmt.Printf("Version: %s\n", Version)
+
 	default:
 		fmt.Println("Not a valid command.")
+		fmt.Println(Usage)
 
 	}
 }
 
 func main() {
+	if len(os.Args[1:]) < 1 {
+		fmt.Println("Please enter a command")
+		os.Exit(1)
+	}
+
 	args := os.Args[1:]
 	parseArgs(args)
 }
