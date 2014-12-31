@@ -40,7 +40,7 @@ Flags:
 
 #### Example
 
-The following example will listen for transactions of 1dice8EMZmqKvrGE4Qc9bUFf9PX3xaYDp and POST the json results to http://requestb.in/nt5bcnnt. You can view the results at http://requestb.in/nt5bcnn?inspect.
+The following example will listen for transactions of 1dice8EMZmqKvrGE4Qc9bUFf9PX3xaYDp and POST the json results to http://requestb.in/nt5bcnnt. You can view the results at http://requestb.in/nt5bcnnt?inspect.
 
 `bithook address 1dice8EMZmqKvrGE4Qc9bUFf9PX3xaYDp -webhook=http://requestb.in/nt5bcnnt`
 
