@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"io/ioutil"
@@ -26,6 +27,15 @@ const (
 	`
 	Version = "0.0.1"
 )
+
+var webhookFlag string
+
+func init() {
+	args := flag.NewFlagSet("", flag.ExitOnError)
+	args.StringVar(&webhookFlag, "webhook", "http://requestb.in/140q6so1", "Webhook URL.")
+	args.Parse(os.Args[2:])
+	flag.Parse()
+}
 
 type connection struct {
 	ws   *websocket.Conn
@@ -117,10 +127,12 @@ func (c *connection) setPinger() {
 
 // Sends POST request along with json data
 func webHook(data []byte) {
-	url := "http://requestb.in/140q6so1"
+	fmt.Println("Sending Request: ", webhookFlag)
+	url := webhookFlag
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
-	req.Header.Set("X-Custom-Header", "myvalue")
+	ua := fmt.Sprintf("bithook-client-%s", Version)
+	req.Header.Set("User-Agent", ua)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -193,7 +205,7 @@ func parseArgs(args []string) {
 
 func main() {
 	if len(os.Args[1:]) < 1 {
-		fmt.Println("Please enter a command")
+		fmt.Println("Please enter a command.")
 		os.Exit(1)
 	}
 
