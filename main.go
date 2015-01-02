@@ -15,7 +15,7 @@ import (
 
 const (
 	PingInterval = time.Second * 30
-	Url          = "wss://ws.blockchain.info:443/inva"
+	Url          = "wss://ws.blockchain.info:443/inv"
 	Usage        = `
 	  Usage:
 	  	bithook <command> [-webhook=<url>]
