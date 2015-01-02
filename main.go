@@ -15,9 +15,10 @@ import (
 
 const (
 	PingInterval = time.Second * 30
-	Url          = "wss://ws.blockchain.info:443/inv"
+	Url          = "wss://ws.blockchain.info:443/inva"
 	Usage        = `
 	  Usage:
+	  	bithook <command> [-webhook=<url>]
 		bithook blocks -- Subscribe to new blocks.
 		bithook unconfirmed -- Subscribe to new unconfirmed transactions.
 		bithook address <address> -- Subscribe to address.
@@ -30,13 +31,6 @@ const (
 
 var webhookFlag string
 
-func init() {
-	args := flag.NewFlagSet("", flag.ExitOnError)
-	args.StringVar(&webhookFlag, "webhook", "http://requestb.in/140q6so1", "Webhook URL.")
-	args.Parse(os.Args[2:])
-	flag.Parse()
-}
-
 type connection struct {
 	ws   *websocket.Conn
 	conn *websocket.Dialer
@@ -44,6 +38,20 @@ type connection struct {
 
 type response struct {
 	Data map[string]interface{} `json:"data"`
+}
+
+// Initialize and parse flags/arguments
+func init() {
+	if len(os.Args[1:]) < 1 {
+		fmt.Println("Please enter a command.")
+		fmt.Println(Usage)
+		os.Exit(1)
+	}
+
+	args := flag.NewFlagSet("", flag.ExitOnError)
+	args.StringVar(&webhookFlag, "webhook", "", "Webhook URL.")
+	args.Parse(os.Args[2:])
+	flag.Parse()
 }
 
 // Send messages wrapper.
@@ -127,9 +135,14 @@ func (c *connection) setPinger() {
 
 // Sends POST request along with json data
 func webHook(data []byte) {
-	fmt.Println("Sending Request: ", webhookFlag)
 	url := webhookFlag
 
+	// Skip request if webhook url isn't set
+	if url == "" {
+		return
+	}
+
+	fmt.Println("Sending Request: ", url)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
 	ua := fmt.Sprintf("bithook-client-%s", Version)
 	req.Header.Set("User-Agent", ua)
@@ -141,9 +154,9 @@ func webHook(data []byte) {
 		panic(err)
 	}
 	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("response Status:", resp.Status)
 	fmt.Println("response Headers:", resp.Header)
-	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("response Body:", string(body))
 }
 
@@ -152,7 +165,10 @@ func connect() *connection {
 	fmt.Println("Starting connection...")
 
 	dialer := websocket.Dialer{}
-	conn, _, _ := dialer.Dial(Url, nil)
+	conn, _, err := dialer.Dial(Url, nil)
+	if err != nil {
+		log.Fatal("Unable to connect to websocket.")
+	}
 
 	c := &connection{ws: conn}
 
@@ -204,11 +220,6 @@ func parseArgs(args []string) {
 }
 
 func main() {
-	if len(os.Args[1:]) < 1 {
-		fmt.Println("Please enter a command.")
-		os.Exit(1)
-	}
-
 	args := os.Args[1:]
 	parseArgs(args)
 }
