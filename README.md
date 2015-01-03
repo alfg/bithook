@@ -13,12 +13,11 @@ Bithook uses the [Blockchain.info](http://blockchain.info) websocket API to list
 * Subscribe to unconfirmed addresses
 * Sends JSON data as a POST request to any URL
 
-## Install
+## Install From Source
 
 ```
 go get github.com/alfg/bithook
-go build
-./bithook help
+./bin/bithook help
 ```
 
 ## Usage
