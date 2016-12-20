@@ -20,6 +20,13 @@ go get github.com/alfg/bithook
 ./bin/bithook help
 ```
 
+## Install from Homebrew
+```
+brew cask alfg/tap
+brew install alfg/tap/bithook
+bithook help
+```
+
 ## Usage
 
 `bithook <command> -webhook=http://webhook/path`
