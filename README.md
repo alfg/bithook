@@ -29,7 +29,7 @@ bithook help
 
 ## Usage
 
-`bithook <command> -webhook=http://webhook/path`
+`bithook <command> http://webhook/path`
 
 ```
 Commands:
@@ -40,15 +40,15 @@ bithook test -- Receives latest transaction. Use for testing.
 bithook help -- This help menu.
 bithook version -- This version.
 
-Flags:
--webhook=<webhook path> -- This is optional. The results will just echo to output if flag not set.
+Optional:
+<webhook path> -- This is optional. The results will just echo to output if not set.
 ```
 
 #### Example
 
 The following example will listen for transactions of 1dice8EMZmqKvrGE4Qc9bUFf9PX3xaYDp and POST the json results to http://requestb.in/nt5bcnnt. You can view the results at http://requestb.in/nt5bcnnt?inspect.
 
-`bithook address 1dice8EMZmqKvrGE4Qc9bUFf9PX3xaYDp -webhook=http://requestb.in/nt5bcnnt`
+`bithook address 1dice8EMZmqKvrGE4Qc9bUFf9PX3xaYDp http://requestb.in/nt5bcnnt`
 
 ## Develop
 

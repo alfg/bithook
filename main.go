@@ -3,14 +3,16 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"strings"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -18,7 +20,7 @@ const (
 	Url          = "wss://ws.blockchain.info:443/inv"
 	Usage        = `
 	  Usage:
-	  	bithook <command> [-webhook=<url>]
+	  	bithook <command> [webhook-url]
 		bithook blocks -- Subscribe to new blocks.
 		bithook unconfirmed -- Subscribe to new unconfirmed transactions.
 		bithook address <address> -- Subscribe to address.
@@ -26,7 +28,7 @@ const (
 		bithook help -- This help menu.
 		bithook version -- This version.
 	`
-	Version = "0.0.1"
+	Version = "0.0.2"
 )
 
 var webhookFlag string
@@ -48,10 +50,11 @@ func init() {
 		os.Exit(1)
 	}
 
-	args := flag.NewFlagSet("", flag.ExitOnError)
-	args.StringVar(&webhookFlag, "webhook", "", "Webhook URL.")
-	args.Parse(os.Args[2:])
-	flag.Parse()
+	// Check if webhook is provided as last argument.
+	hasWebhook := strings.HasPrefix(os.Args[len(os.Args)-1], "http")
+	if hasWebhook {
+		webhookFlag = os.Args[len(os.Args)-1]
+	}
 }
 
 // Send messages wrapper.
